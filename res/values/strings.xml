@@ -403,6 +403,10 @@
     <!-- The button label for discarding changes to an event -->
     <string name="discard_label">Cancel</string>
 
+    <!-- test code -->
+    <string name="test_label">Test</string>
+
+
     <!-- Button labels on expanded notification reminders: -->
     <skip/>
     <!-- The button label for making the reminder alarms go away temporarily.

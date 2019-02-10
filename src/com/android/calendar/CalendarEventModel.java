@@ -25,6 +25,7 @@ import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Reminders;
 import android.text.TextUtils;
 import android.text.util.Rfc822Token;
+import android.util.Log;
 
 import com.android.calendar.event.EditEventHelper;
 import com.android.calendar.event.EventColorCache;
@@ -198,6 +199,8 @@ public class CalendarEventModel implements Serializable {
             return false;
         }
         if (TextUtils.isEmpty(mOwnerAccount)) {
+            //여기에 문제가 있다.
+            Log.e("이거군","이거군");
             return false;
         }
         return true;

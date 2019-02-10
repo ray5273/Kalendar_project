@@ -35,6 +35,7 @@ import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.calendar.AbstractCalendarActivity;
 import com.android.calendar.AsyncQueryService;
@@ -303,7 +304,6 @@ public class EditEventHelper {
         int eventIdIndex = -1;
 
         ContentValues values = getContentValuesFromModel(model);
-
         if (model.mUri != null && originalModel == null) {
             Log.e(TAG, "Existing event but no originalModel provided. Aborting save.");
             return false;
@@ -319,6 +319,7 @@ public class EditEventHelper {
         values.put(Events.HAS_ALARM, (len > 0) ? 1 : 0);
 
         if (uri == null) {
+
             // Add hasAttendeeData for a new event
             values.put(Events.HAS_ATTENDEE_DATA, 1);
             values.put(Events.STATUS, Events.STATUS_CONFIRMED);
@@ -327,6 +328,8 @@ public class EditEventHelper {
                     Events.CONTENT_URI).withValues(values);
             ops.add(b.build());
             forceSaveReminders = true;
+            Log.e("in-->  if(uri == null)","error after this");
+
 
         } else if (TextUtils.isEmpty(model.mRrule) && TextUtils.isEmpty(originalModel.mRrule)) {
             // Simple update to a non-recurring event
@@ -400,6 +403,7 @@ public class EditEventHelper {
             forceSaveReminders = true;
 
         } else if (modifyWhich == MODIFY_ALL) {
+            Log.e("error after this","error after this");
 
             // Modify all instances of repeating event
             if (TextUtils.isEmpty(model.mRrule)) {
@@ -417,6 +421,8 @@ public class EditEventHelper {
                 ops.add(ContentProviderOperation.newUpdate(uri).withValues(values).build());
             }
         }
+
+
 
         // New Event or New Exception to an existing event
         boolean newEvent = (eventIdIndex != -1);
@@ -476,6 +482,8 @@ public class EditEventHelper {
             b = ContentProviderOperation.newUpdate(attUri).withValues(values);
             ops.add(b.build());
         }
+
+        Log.e("in-->  after attendees","error after this");
 
         // TODO: is this the right test? this currently checks if this is
         // a new event or an existing event. or is this a paranoia check?
@@ -563,9 +571,11 @@ public class EditEventHelper {
             }
         }
 
+        Log.e("in-->  before batch","error after this");
 
         mService.startBatch(mService.getNextToken(), null, android.provider.CalendarContract.AUTHORITY, ops,
                 Utils.UNDO_DELAY);
+        Log.e("in-->  after batch","error after this");
 
         return true;
     }
@@ -1186,12 +1196,17 @@ public class EditEventHelper {
         }
 
         if (!model.mOrganizerCanRespond) {
+            Log.e("여긴가?","여긴가?");
             return false;
         }
 
         // This means we don't have the attendees data so we can't send
         // the list of attendees and the status back to the server
         if (model.mHasAttendeeData && model.mAttendeesList.size() == 0) {
+            //test code
+            Log.e("여긴가?","여긴가?");
+            Log.e("model.mHasAttendeeData","value=="+model.mHasAttendeeData);
+            Log.e("model.mAttendeessize","value=="+model.mAttendeesList.size());
             return false;
         }
 

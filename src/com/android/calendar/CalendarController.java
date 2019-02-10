@@ -580,6 +580,7 @@ public class CalendarController {
     public Intent generateCreateEventIntent(long startMillis, long endMillis,
                                             boolean allDayEvent, String title, long calendarId) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
+
         intent.setClass(mContext, EditEventActivity.class);
         intent.putExtra(EXTRA_EVENT_BEGIN_TIME, startMillis);
         intent.putExtra(EXTRA_EVENT_END_TIME, endMillis);

@@ -113,6 +113,7 @@ public class CreateEventDialogFragment extends DialogFragment implements TextWat
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = layoutInflater.inflate(R.layout.create_event_dialog, null);
 
+        Toast.makeText(getActivity().getApplicationContext(),"dialog",Toast.LENGTH_SHORT).show();
         mColor = view.findViewById(R.id.color);
         mCalendarName = (TextView) view.findViewById(R.id.calendar_name);
         mAccountName = (TextView) view.findViewById(R.id.account_name);

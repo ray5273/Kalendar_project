@@ -115,6 +115,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     EditEventView mView;
     QueryHandler mHandler;
     int mModification = Utils.MODIFY_UNINITIALIZED;
+
     /**
      * A bitfield of TOKEN_* to keep track which query hasn't been completed
      * yet. Once all queries have returned, the model can be applied to the
@@ -333,6 +334,8 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             Toast.makeText(mContext, R.string.calendar_permission_not_granted, Toast.LENGTH_LONG).show();
         } else {
             startQuery();
+//            //test code
+//            Toast.makeText(mContext,"Under startQuery",Toast.LENGTH_SHORT).show();
         }
 
 
@@ -343,6 +346,9 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             cancelActionView.setOnClickListener(mActionBarListener);
             View doneActionView = actionBarButtons.findViewById(R.id.action_done);
             doneActionView.setOnClickListener(mActionBarListener);
+            //test code
+            View testActionView = actionBarButtons.findViewById(R.id.action_test);
+            testActionView.setOnClickListener(mActionBarListener);
             ActionBar.LayoutParams layout = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
             mContext.getSupportActionBar().setCustomView(actionBarButtons, layout);
         }
@@ -449,6 +455,12 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         } else if (itemId == R.id.action_cancel) {
             mOnDone.setDoneCode(Utils.DONE_REVERT);
             mOnDone.run();
+            Toast.makeText(getActivity().getApplicationContext(),"new test",Toast.LENGTH_SHORT).show();
+        }else if(itemId == R.id.action_test){
+            //test code
+            mOnDone.setDoneCode(Utils.DONE_SAVE | Utils.DONE_EXIT);
+            mOnDone.runByGesture();
+
         }
         return true;
     }
@@ -553,14 +565,17 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     boolean isEmptyNewEvent() {
         if (mOriginalModel != null) {
             // Not new
+            Log.e("originalmodel",mOriginalModel.isEmpty()+"==value");
             return false;
         }
 
         if (mModel.mOriginalStart != mModel.mStart || mModel.mOriginalEnd != mModel.mEnd) {
+            Log.e("attenddeslist","==value");
             return false;
         }
 
         if (!mModel.mAttendeesList.isEmpty()) {
+            Log.e("attenddeslist","==value");
             return false;
         }
 
@@ -663,6 +678,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+
             // If the query didn't return a cursor for some reason return
             if (cursor == null) {
                 return;
@@ -676,6 +692,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                 return;
             }
             long eventId;
+
             switch (token) {
                 case TOKEN_EVENT:
                     if (cursor.getCount() == 0) {
@@ -918,6 +935,8 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                     && mModel.normalizeReminders()
                     && mHelper.saveEvent(mModel, mOriginalModel, mModification)) {
                 int stringResource;
+
+                Toast.makeText(mContext, mModel.mOwnerAccount, Toast.LENGTH_SHORT).show();
                 if (!mModel.mAttendeesList.isEmpty()) {
                     if (mModel.mUri != null) {
                         stringResource = R.string.saving_event_with_guest;
@@ -994,6 +1013,79 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             if (focusedView != null) {
                 mInputMethodManager.hideSoftInputFromWindow(focusedView.getWindowToken(), 0);
             }
+        }
+
+
+        //test code
+        //We need to move this code to Gesture class
+        public void runByGesture() {
+            // We only want this to get called once, either because the user
+            // pressed back/home or one of the buttons on screen
+            mSaveOnDetach = false;
+            if (mModification == Utils.MODIFY_UNINITIALIZED) {
+                // If this is uninitialized the user hit back, the only
+                // changeable item is response to default to all events.
+                mModification = Utils.MODIFY_ALL;
+            }
+
+//            mModel.mStart = mBegin;
+//            mModel.mEnd = mEnd;
+            mModel.mCalendarId=0;
+            mModel.mId=-1;
+            mModel.mOrganizerCanRespond=true;
+            mModel.mHasAttendeeData=false;
+            mModel.mUri=null;
+            Log.e("get title",mModel.mStart+"");
+            Log.e("get title",mBegin+"");
+            Log.e("mCode&Utils.DONE_SAVE",(mCode & Utils.DONE_SAVE)+"==value");
+            Log.e("mModel != null",mModel+"==value");
+            Log.e("canRespond(mModel)",(EditEventHelper.canRespond(mModel)+"==value"));
+            Log.e("canModifyEvent(mModel)",EditEventHelper.canModifyEvent(mModel)+"==value");
+            Log.e("normalizeReminders()",mModel.normalizeReminders()+"==value");
+            Log.e("mCode&Utils.DONE_SAVE",(mCode & Utils.DONE_SAVE)+"==value");
+            Log.e("mModification",mModification+"==value");
+            Log.e("mView.prepareForSave()",mView.prepareForSave()+"==value");
+            Log.e("!isEmptyNewEvent()",!isEmptyNewEvent()+"==value");
+
+
+            if ((mCode & Utils.DONE_SAVE) != 0 && mModel != null
+                    && (EditEventHelper.canRespond(mModel)
+                    || EditEventHelper.canModifyEvent(mModel))
+                    && mView.prepareForSaveByGesture()
+                    && mModel.normalizeReminders()
+                    && mHelper.saveEvent(mModel, mOriginalModel, mModification)) {
+                int stringResource;
+
+                if (!mModel.mAttendeesList.isEmpty()) {
+                    if (mModel.mUri != null) {
+                        stringResource = R.string.saving_event_with_guest;
+                    } else {
+                        stringResource = R.string.creating_event_with_guest;
+                    }
+                } else {
+                    if (mModel.mUri != null) {
+                        stringResource = R.string.saving_event;
+                    } else {
+                        stringResource = R.string.creating_event;
+                    }
+                }
+                Toast.makeText(mContext, stringResource, Toast.LENGTH_SHORT).show();
+            }
+
+            Activity a = EditEventFragment.this.getActivity();
+            if (a != null) {
+                a.finish();
+            }
+            Log.e("in--> finish activity","error after this");
+
+            // Hide a software keyboard so that user won't see it even after this Fragment's
+            // disappearing.
+            final View focusedView = mContext.getCurrentFocus();
+            if (focusedView != null) {
+                mInputMethodManager.hideSoftInputFromWindow(focusedView.getWindowToken(), 0);
+            }
+            Log.e("in-->  after foucsedview","error after this");
+
         }
     }
 }

@@ -527,8 +527,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                 } else if (t.minute > 0 && t.minute < 30) {
                     t.minute = 30;
                 }
-                mController.sendEventRelatedEvent(
-                        this, EventType.CREATE_EVENT, -1, t.toMillis(true), 0, 0, 0, -1);
+                mController.sendEventRelatedEvent(this, EventType.CREATE_EVENT, -1, t.toMillis(true), 0, 0, 0, -1);
             }
         });
     }

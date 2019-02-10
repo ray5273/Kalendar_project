@@ -539,6 +539,14 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         return fillModelFromUI();
     }
 
+    //test code
+    public boolean prepareForSaveByGesture() {
+        if (mModel == null || (mCalendarsCursor == null && mModel.mUri == null)) {
+            return false;
+        }
+        return fillModelFromGestureImage();
+    }
+
     public boolean fillModelFromReadOnlyUi() {
         if (mModel == null || (mCalendarsCursor == null && mModel.mUri == null)) {
             return false;
@@ -717,6 +725,8 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         }
         mModel.mTimezone = mTimezone;
         mModel.mAccessLevel = mAccessLevelSpinner.getSelectedItemPosition();
+        Log.e("mAccessLevel?",mModel.mAccessLevel+"==value");
+
         // TODO set correct availability value
         mModel.mAvailability = mAvailabilityValues.get(mAvailabilitySpinner
                 .getSelectedItemPosition());
@@ -732,6 +742,123 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
 
         return true;
     }
+
+    //test code
+    private boolean fillModelFromGestureImage() {
+        if (mModel == null) {
+            return false;
+        }
+
+        //이건 잘 모르겠다 아직 ㅜㅜ
+        //Reminder 설정을 추가하던지 하나만 하던지 해야할듯 --> 수정 필요!
+        //view에서는 1개가 기본적으로 추가되어있다.
+        mModel.mReminders = EventViewUtils.reminderItemsToReminders(mReminderItems,
+                mReminderMinuteValues, mReminderMethodValues);
+        mModel.mReminders.addAll(mUnsupportedReminders);
+        mModel.normalizeReminders();
+
+//        mModel.mHasAlarm = mReminderItems.size() > 0;
+        mModel.mHasAlarm = false;
+        mModel.mTitle = "need to be changed";
+        mModel.mAllDay = false;
+        mModel.mLocation = null;
+        mModel.mDescription = null;
+//        mModel.mDescription = mDescriptionTextView.getText().toString();
+//        if (TextUtils.isEmpty(mModel.mLocation)) {
+//            mModel.mLocation = null;
+//        }
+//        if (TextUtils.isEmpty(mModel.mDescription)) {
+//            mModel.mDescription = null;
+//        }
+
+        mModel.mSelfAttendeeStatus = Attendees.ATTENDEE_STATUS_ACCEPTED;
+//
+//        if (status != Attendees.ATTENDEE_STATUS_NONE) {
+//            mModel.mSelfAttendeeStatus = status;
+//        }
+
+//        if (mAttendeesList != null) {
+//            mEmailValidator.setRemoveInvalid(true);
+//            mAttendeesList.performValidation();
+//            mModel.mAttendeesList.clear();
+//            mModel.addAttendees(mAttendeesList.getText().toString(), mEmailValidator);
+//            mEmailValidator.setRemoveInvalid(false);
+//        }
+
+
+        // 여기는 고쳐야할듯 좀 어려움
+        // If this was a new event we need to fill in the Calendar information
+        if (mModel.mUri == null) {
+            mModel.mCalendarId = mCalendarsSpinner.getSelectedItemId();
+            int calendarCursorPosition = mCalendarsSpinner.getSelectedItemPosition();
+            if (mCalendarsCursor.moveToPosition(calendarCursorPosition)) {
+                String calendarOwner = mCalendarsCursor.getString(
+                        EditEventHelper.CALENDARS_INDEX_OWNER_ACCOUNT);
+                String calendarName = mCalendarsCursor.getString(
+                        EditEventHelper.CALENDARS_INDEX_DISPLAY_NAME);
+                String defaultCalendar = calendarOwner + "/" + calendarName;
+                Utils.setSharedPreference(
+                        mActivity, GeneralPreferences.KEY_DEFAULT_CALENDAR, defaultCalendar);
+                mModel.mOwnerAccount = calendarOwner;
+                mModel.mOrganizer = calendarOwner;
+                mModel.mCalendarId = mCalendarsCursor.getLong(EditEventHelper.CALENDARS_INDEX_ID);
+            }
+        }
+
+        if (mModel.mAllDay) {
+            // Reset start and end time, increment the monthDay by 1, and set
+            // the timezone to UTC, as required for all-day events.
+            mTimezone = Time.TIMEZONE_UTC;
+            mStartTime.hour = 0;
+            mStartTime.minute = 0;
+            mStartTime.second = 0;
+            mStartTime.timezone = mTimezone;
+            mModel.mStart = mStartTime.normalize(true);
+
+            mEndTime.hour = 0;
+            mEndTime.minute = 0;
+            mEndTime.second = 0;
+            mEndTime.timezone = mTimezone;
+            // When a user see the event duration as "X - Y" (e.g. Oct. 28 - Oct. 29), end time
+            // should be Y + 1 (Oct.30).
+            final long normalizedEndTimeMillis =
+                    mEndTime.normalize(true) + DateUtils.DAY_IN_MILLIS;
+            if (normalizedEndTimeMillis < mModel.mStart) {
+                // mEnd should be midnight of the next day of mStart.
+                mModel.mEnd = mModel.mStart + DateUtils.DAY_IN_MILLIS;
+            } else {
+                mModel.mEnd = normalizedEndTimeMillis;
+            }
+        } else {
+
+            //여기의 mStart와 mEnd를 고쳐주면 됩니다.
+            //주석의 예제는 현재 시간에서 30분 더 미뤄서 등록하는것
+            mStartTime.timezone = mTimezone;
+            mEndTime.timezone = mTimezone;
+            mModel.mStart = mStartTime.toMillis(true);
+            mModel.mEnd = mEndTime.toMillis(true);
+//          예제
+//            mModel.mStart = mStartTime.toMillis(true)+1800000;
+//            mModel.mEnd = mEndTime.toMillis(true)+1800000;
+        }
+        mModel.mTimezone = mTimezone;
+        mModel.mAccessLevel = mAccessLevelSpinner.getSelectedItemPosition();
+        // TODO set correct availability value
+        mModel.mAvailability = mAvailabilityValues.get(mAvailabilitySpinner
+                .getSelectedItemPosition());
+
+        // rrrule
+        // If we're making an exception we don't want it to be a repeating
+        // event.
+        if (mModification == EditEventHelper.MODIFY_SELECTED) {
+            mModel.mRrule = null;
+        } else {
+            mModel.mRrule = mRrule;
+        }
+
+        return true;
+    }
+
 
     private void prepareAccess() {
         Resources r = mActivity.getResources();

@@ -9,4 +9,11 @@
     android:minHeight="?attr/actionBarSize"
     android:theme="@style/Widget.CalendarAppTheme.ActionBar"
     app:theme="@style/ThemeOverlay.CalendarAppTheme.ActionBar"
-    app:titleTextAppearance="?attr/settings_titleText" />
+    app:titleTextAppearance="?attr/settings_titleText" >
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="test btn"-->
+        <!--android:id="@+id/btn_test"-->
+        <!--/>-->
+</android.support.v7.widget.Toolbar>

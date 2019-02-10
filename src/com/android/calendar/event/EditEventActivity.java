@@ -26,6 +26,9 @@ import android.support.v7.widget.Toolbar;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.android.calendar.AbstractCalendarActivity;
 import com.android.calendar.CalendarController;
@@ -53,6 +56,8 @@ public class EditEventActivity extends AbstractCalendarActivity {
     private static boolean mIsMultipane;
     private final DynamicTheme dynamicTheme = new DynamicTheme();
     private EditEventFragment mEditFragment;
+    //test code
+    private EditEventFragment EditFragment;
 
     private ArrayList<ReminderEntry> mReminders;
 
@@ -61,7 +66,8 @@ public class EditEventActivity extends AbstractCalendarActivity {
     private boolean mEventColorInitialized;
 
     private EventInfo mEventInfo;
-
+    //일정 추가 action 관리
+    //일정 추가 버튼 누를시 실행됨
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -79,6 +85,31 @@ public class EditEventActivity extends AbstractCalendarActivity {
 
         mIsMultipane = Utils.getConfigBool(this, R.bool.multiple_pane_config);
 
+        //test code
+        EditFragment = new EditEventFragment();
+
+//        //test code
+//        Button test_btn;
+//        test_btn = (Button)findViewById(R.id.btn_test);
+//        test_btn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Toast.makeText(getApplicationContext(),"click test",Toast.LENGTH_SHORT).show();
+//                Intent intent = null;
+//                boolean readOnly = false;
+//                if (mEventInfo.id == -1) {
+//                    intent = getIntent();
+//                    readOnly = intent.getBooleanExtra(EXTRA_READ_ONLY, false);
+//                }
+//
+//                if(mEditFragment==null){
+//                    mEditFragment = new EditEventFragment(mEventInfo, mReminders, mEventColorInitialized,
+//                            mEventColor, readOnly, intent);
+//                }
+//
+//            }
+//        });
+        //Toast.makeText(getApplicationContext(),"hello",Toast.LENGTH_SHORT).show();
         if (mIsMultipane) {
             getSupportActionBar().setDisplayOptions(
                     ActionBar.DISPLAY_SHOW_TITLE,
